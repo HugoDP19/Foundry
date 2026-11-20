@@ -1,0 +1,124 @@
+* { box-sizing:border-box }
+/* Colores y letra de toda la página. */
+body {
+  margin: 0;
+  background: #eee8dc;
+  color: #342c29;
+  font-family: system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+/* Caja que contiene todo el chat. */
+main {
+  width: 100%;
+  max-width: 800px;
+  height: 88dvh;
+  max-height: 900px;
+  margin: 6dvh auto;
+  display: flex;
+  flex-direction: column;
+  background: #fffaf1;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 12px 50px #4e332218;
+}
+
+/* Franja de color detrás del título. */
+header {
+  background: #682e32;
+  color: #fff7eb;
+  padding: 22px 6%;
+  border-bottom: 4px solid #bf965e;
+}
+
+/* Título «Historia del Perú». */
+h1 {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-weight: normal;
+  font-size: clamp(29px, 5vw, 42px);
+}
+
+/* Espacio donde aparecen los mensajes. Si se llena, puedes desplazarte para leerlos. */
+#chat {
+  flex: 1;
+  overflow: auto;
+  padding: 24px 6%;
+}
+
+/* Cada mensaje tiene su propio espacio. */
+article {
+  width: fit-content;
+  max-width: 86%;
+  margin-bottom: 18px;
+}
+
+/* Nombre de quien escribe. */
+article > strong {
+  font-size: 13px;
+  color: #674b3f;
+}
+
+/* Burbuja que contiene el texto del mensaje. */
+article > p, article > div {
+  margin: 4px 0;
+  padding: 12px 17px;
+  background: #efe7da;
+  border-radius: 3px 15px 15px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Tus mensajes aparecen a la derecha. */
+.usuario {
+  margin-left: auto;
+}
+
+.usuario strong {
+  display: block;
+  text-align: right;
+}
+
+.usuario p {
+  background: #683238;
+  color: white;
+  border-radius: 15px 3px 15px 15px;
+}
+
+/* Zona inferior donde escribes y envías tu pregunta. */
+form {
+  padding: 16px 6%;
+  background: #fffdf8;
+  border-top: 1px solid #dfd3c2;
+  display: flex;
+  gap: 8px;
+}
+
+input,button {
+  font: inherit;
+  border-radius: 10px;
+  padding: 10px 13px;
+}
+
+input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #bbaa96;
+}
+
+button {
+  background: #682e32;
+  color: white;
+  border: 0;
+  cursor: pointer;
+}
+
+/* El botón se ve más tenue mientras esperas la respuesta. */
+button:disabled {
+  opacity: .6;
+}
+@media(max-width:650px){ main { height:100dvh; margin:0; border-radius:0 } }
+
+article > div p, article > div ul { margin: 0 0 .5em; }
+article > div > :last-child { margin-bottom: 0; }

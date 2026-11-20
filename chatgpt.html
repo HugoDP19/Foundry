@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Historia del Perú</title>
+<link rel="stylesheet" href="chatgpt.css">
+</head><body><main>
+<header><h1>Historia del Perú</h1></header>
+<section id="chat" aria-label="Conversación" role="log">
+<article><strong>Asistente</strong><p>¡Hola! Podemos explorar desde las culturas preincas hasta el Perú. ¿Qué te gustaría conocer?</p></article>
+</section>
+<form><input aria-label="Tu pregunta" placeholder="Escribe tu pregunta…" maxlength="4000" required>
+<button>Enviar</button></form></main>
+<script>
+// Si abres el archivo directamente o con Live Server, usa el servidor del chat.
+const vistaLocal = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname);
+if (location.protocol === "file:" || (vistaLocal && location.port !== "3001")) {
+  location.replace("http://127.0.0.1:3001/");
+}
+
+const historial = [];
+const chat = document.querySelector("#chat");
+const form = document.querySelector("form");
+const campo = form.querySelector("input");
+const boton = form.querySelector("button");
+
+function mensaje(nombre, texto) {
+  const bloque = document.createElement("article");
+  if (nombre === "Tú") bloque.className = "usuario";
+  const autor = document.createElement("strong");
+  autor.textContent = nombre;
+  const contenido = document.createElement(nombre === "Tú" ? "p" : "div");
+  contenido.textContent = texto;
+  bloque.append(autor, contenido);
+  chat.append(bloque);
+  chat.scrollTop = chat.scrollHeight;
+  return contenido;
+}
+
+// Muestra las negritas y las listas sin interpretar el texto del bot como HTML.
+function mostrarMarkdown(caja, texto) {
+  caja.replaceChildren();
+  let lista;
+  for (const linea of texto.split("\n")) {
+    const esItem = /^\s*[-*] /.test(linea);
+    if (!esItem) lista = null;
+    if (!linea.trim()) continue;
+    const fila = document.createElement(esItem ? "li" : "p");
+    if (esItem) {
+      if (!lista) {
+        lista = document.createElement("ul");
+        caja.append(lista);
+      }
+      lista.append(fila);
+    } else {
+      caja.append(fila);
+    }
+    const partes = linea.replace(/^\s*[-*] /, "").split(/\*\*(.+?)\*\*/g);
+    partes.forEach((parte, i) => {
+      if (i % 2 === 0) fila.append(parte);
+      else {
+        const negrita = document.createElement("strong");
+        negrita.textContent = parte;
+        fila.append(negrita);
+      }
+    });
+  }
+}
+
+form.onsubmit = async evento => {
+  evento.preventDefault();
+  const pregunta = campo.value.trim();
+  if (!pregunta || boton.disabled) return;
+  boton.disabled = true;
+  campo.value = "";
+  mensaje("Tú", pregunta);
+  const salida = mensaje("Asistente", "Consultando…");
+  const turno = { role: "user", content: pregunta };
+  try {
+    const respuesta = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mensajes: [...historial, turno] })
+    });
+    if (!respuesta.ok) {
+      const detalle = respuesta.status === 413 ? "La conversación es demasiado larga. Recarga la página para empezar otra." : await respuesta.text();
+      throw new Error(detalle || "El servidor no pudo responder. Abre el chat en http://localhost:3001.");
+    }
+    const lector = respuesta.body.pipeThrough(new TextDecoderStream()).getReader();
+    let texto = "";
+    while (true) {
+      const { done, value } = await lector.read();
+      if (done) break;
+      texto += value;
+      mostrarMarkdown(salida, texto);
+      chat.scrollTop = chat.scrollHeight;
+    }
+    historial.push(turno, { role: "assistant", content: texto });
+  } catch (error) {
+    salida.textContent = error instanceof TypeError ? "Se interrumpió la conexión. Vuelve a intentarlo." : error.message;
+  } finally {
+    boton.disabled = false;
+    campo.focus();
+  }
+};
+</script></body></html>
